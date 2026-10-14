@@ -1,38 +1,34 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import AdminOrders from "@/components/AdminOrders";
 
-import { useEffect, useState } from "react";
-
-// Pretend session until sign-in is wired to the cookie
-const user = { email: "nora@craftbay.test", role: "seller" };
-
-export default function Admin() {
-  const [orders, setOrders] = useState([]);
-
-  useEffect(() => {
-    fetch("/api/orders").then((r) => r.json()).then(setOrders);
-  }, []);
-
-  async function remove(id) {
-    await fetch(`/api/orders?id=${id}`, { method: "DELETE" });
-    setOrders(orders.filter((o) => o.id !== id));
+function getSession() {
+  const raw = cookies().get("user")?.value;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
   }
+}
+
+export const dynamic = "force-dynamic";
+
+// Server component: the admin role is verified here, on the server, before
+// any admin data or controls are sent to the browser.
+export default function Admin() {
+  const session = getSession();
+  if (!session || session.role !== "admin") {
+    redirect("/");
+  }
+
+  const orders = db.orders.list();
 
   return (
     <main>
       <h1>Orders</h1>
-      <table>
-        <tbody>
-          {orders.map((o) => (
-            <tr key={o.id}>
-              <td>#{o.id}</td>
-              <td>{o.buyer}</td>
-              <td>${o.total}</td>
-              <td>{o.status}</td>
-              <td>{user.role === "admin" && <button onClick={() => remove(o.id)}>Delete</button>}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <AdminOrders initialOrders={orders} />
     </main>
   );
 }
