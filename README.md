@@ -16,7 +16,7 @@ Open http://localhost:3000. Next reads `PORT` if it is set. Runs with no environ
 | Variable | Used for |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY` | Admin dashboard |
+| `SUPABASE_SERVICE_ROLE_KEY` | Admin dashboard |
 
 ## Routes
 
